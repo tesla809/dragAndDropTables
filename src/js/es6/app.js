@@ -1,3 +1,6 @@
+// technical debt:
+// refactor populateTable- seperate columns and rows creation
+// make $.when more DRY
 "use strict";
 const app = function() {
   document.addEventListener("DOMContentLoaded", (event) => {
@@ -6,8 +9,54 @@ const app = function() {
     console.log(`jquery works ${$}`);
 
     const rootUrl = 'https://jsonplaceholder.typicode.com';
+    const mainContentDiv = document.querySelector('div#main-content');
 
-    const callback = (user1, user2, album1, album2) => {
+    const createTable = function(user, album, targetElement){
+    	console.log(user, album, user.id, album.id);
+
+    	const populateTable = function(elementObject, targetElement, propIgnore){
+    		for(let prop in elementObject){
+    			if(prop !== propIgnore){
+    				// create column
+	    			let el = document.createElement('div');
+	    			let p = document.createElement('p');
+	    			p.innerText = prop;
+	    			el.appendChild(p);
+
+	    			// create rows
+	    			let elValue = document.createElement('div');
+	    			elValue.innerText = elementObject[prop];
+	    			el.appendChild(elValue);
+
+	    			// append all to tableContainer
+	    			targetElement.appendChild(el);
+    			}
+    		}
+    	}
+
+    	// create div to hold table
+    	const tableContainer = document.createElement('div');
+    	tableContainer.id = `user-${user.id}`;
+    	tableContainer.className = 'tableFlex';
+
+    	const table = document.createElement('div');
+    	table.id = `table-${user.id}`;
+
+    	const tableHeader = document.createElement('h2');
+    	tableHeader.innerText = user.name;
+
+    	// append elements
+    	table.appendChild(tableHeader);
+    	tableContainer.appendChild(table);
+    	targetElement.appendChild(tableContainer);
+
+    	populateTable(album, table, 'userId');
+    	
+    	// test
+    	console.log(targetElement);
+    }
+
+    const allAjaxCompleteCB = (user1, user2, album1, album2) => {
     	console.log('done');
     	user1 = user1[0];
     	user2 = user2[0];
@@ -18,7 +67,12 @@ const app = function() {
     	console.log(user2);
     	console.log(album1);
     	console.log(album2);
+
+    	// create user1 table
+    	createTable(user1, album1, mainContentDiv);
+    	createTable(user2, album2, mainContentDiv);
     }
+
 
 	// make DRY, iterable
     $.when(
@@ -60,7 +114,7 @@ const app = function() {
 	    	.fail(function(){
 	    		console.log('call to /albums/2 failed');
 	    	}),
-   	).then(callback);
+   	).then(allAjaxCompleteCB);
   });
 
 }();
