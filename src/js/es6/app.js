@@ -14,44 +14,51 @@ const app = function() {
     const createTable = function(user, album, targetElement){
     	console.log(user, album, user.id, album.id);
 
-    	const populateTable = function(elementObject, targetElement, propIgnore){
+    	const populateTable = function(elementObject, propIgnore){
+			const tableContainer = document.createElement('div');
+			tableContainer.className = 'Rtable Rtable--2cols';
+
     		for(let prop in elementObject){
     			if(prop !== propIgnore){
-    				// create column
-	    			let el = document.createElement('div');
-	    			let p = document.createElement('p');
-	    			p.innerText = prop;
-	    			el.appendChild(p);
+    				// create columns
+    				let elColumn = document.createElement('div');
+    				elColumn.className = 'Rtable-cell Rtable-cell--head';
+    				elColumn.style = 'order:0;';
+    				elColumn.id = `${elementObject}-${prop}`;
+    				let elColumnH3 = document.createElement('h3');
+    				elColumnH3.innerText = prop.toUpperCase();
+    				elColumn.appendChild(elColumnH3);
 
-	    			// create rows
-	    			let elValue = document.createElement('div');
-	    			elValue.innerText = elementObject[prop];
-	    			el.appendChild(elValue);
 
-	    			// append all to tableContainer
-	    			targetElement.appendChild(el);
+    				// populate column's rows
+    				let elData = document.createElement('div');
+    				elData.className = 'Rtable-cell';
+    				elData.style = 'order:1;';
+    				elData.innerText = elementObject[prop];
+    				elData.id = `${elementObject}-${elementObject[prop]}`
+
+    				tableContainer.appendChild(elColumn);
+    				tableContainer.appendChild(elData);
     			}
     		}
+    		return tableContainer;
     	}
 
-    	// create div to hold table
-    	const tableContainer = document.createElement('div');
-    	tableContainer.id = `user-${user.id}`;
-    	tableContainer.className = 'tableFlex';
-
+    	// create table
     	const table = document.createElement('div');
-    	table.id = `table-${user.id}`;
+    	table.id = `table-${user.name}`;
 
-    	const tableHeader = document.createElement('h2');
-    	tableHeader.innerText = user.name;
 
-    	// append elements
-    	table.appendChild(tableHeader);
-    	tableContainer.appendChild(table);
-    	targetElement.appendChild(tableContainer);
+    	const userHeader = document.createElement('h3');
+    	userHeader.innerText = user.name;
+    	userHeader.className = 'user-title';
 
-    	populateTable(album, table, 'userId');
-    	
+    	const tableInfo = populateTable(album, 'userId');
+    	console.log(tableInfo);
+
+    	targetElement.appendChild(userHeader);
+    	targetElement.appendChild(table);
+    	table.appendChild(tableInfo);
     }
 
     const allAjaxCompleteCB = (user1, user2, album1, album2) => {
@@ -67,7 +74,7 @@ const app = function() {
     	console.log(album2);
 
     	const allTablesContainer = document.createElement('div');
-    	allTablesContainer.className = 'mainTableFlex';
+    	allTablesContainer.className = '';
     	allTablesContainer.id = 'all-table-container';
 
     	// append main table container to mainContent Div
