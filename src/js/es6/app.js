@@ -52,8 +52,6 @@ const app = function() {
 
     	populateTable(album, table, 'userId');
     	
-    	// test
-    	console.log(targetElement);
     }
 
     const allAjaxCompleteCB = (user1, user2, album1, album2) => {
@@ -68,9 +66,19 @@ const app = function() {
     	console.log(album1);
     	console.log(album2);
 
+    	const allTablesContainer = document.createElement('div');
+    	allTablesContainer.className = 'mainTableFlex';
+    	allTablesContainer.id = 'all-table-container';
+
+    	// append main table container to mainContent Div
+    	mainContentDiv.appendChild(allTablesContainer);
+
     	// create user1 table
-    	createTable(user1, album1, mainContentDiv);
-    	createTable(user2, album2, mainContentDiv);
+    	createTable(user1, album1, allTablesContainer);
+    	createTable(user2, album2, allTablesContainer);
+
+    	// test
+    	console.log(mainContentDiv);
     }
 
 
