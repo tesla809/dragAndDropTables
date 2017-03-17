@@ -56,7 +56,8 @@ h3 { font-size: 1.2em; }
 h4 { font-size: 1em; }
 strong { color: darken(slategrey,20%); }
 
-// additional style
+/* Additional styles
+================================== */
 .mainTableFlex {
 	display: flex;
 	flex-direction: row;
@@ -82,6 +83,18 @@ strong { color: darken(slategrey,20%); }
 .centerText {
 	text-align: center;
 	vertical-align: middle;
+}
+
+
+/* Drag and drop
+================================== */
+[data-drop-target]:hover {
+			background-color: gainsboro;
+			float: left;
+}
+
+.drag-enter {
+	border: 2px dashed #000;
 }
 
 
