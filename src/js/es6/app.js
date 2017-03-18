@@ -88,20 +88,21 @@ const app = function() {
             table.appendChild(tableInfo);
         }
 
-        function newRow(el, targetElement){
-        	const row = document.createElement('div');
-        	row.innerText = el.innerText;
-
-        	targetElement.appendChild(row);
-        	console.log('new row');
+        function moveRow(el, targetElement){
+        	const targetRow = el.parentNode;
+        	targetRow.className = 'Table-row';
+        	const elRowChildren = el.parentNode.children;
+        	targetElement.appendChild(targetRow);	
         }
 
         const allAjaxCompleteCB = (user1, user2, album1, album2) => {
             let dragSrcEl = null;
 
             function handleDragStart(e) {
-                this.style.opacity = '0.4';
-                this.style.border = '2px dashed #000';
+	        	const targetRow = e.target.parentNode;
+
+        		targetRow.style.opacity = '0.4';
+                targetRow.style.border = '2px dashed #000';
 
                 dragSrcEl = this;
 
@@ -146,18 +147,15 @@ const app = function() {
                 }
 
                 // >>> add the new row feature here <<<
-                console.log('dragSrcEl',dragSrcEl);
-                console.log('e.target.parentNode',e.target.parentNode);
+                console.log('dragSrcEl', dragSrcEl);
+                console.log('e.target.parentNode', e.target.parentNode);
 
-                const parentTable = e.target.parentNode;
-                newRow(dragSrcEl, parentTable);
+                const parentTable = e.target.parentNode.parentNode;
 
-                // // Don't do anything if dropping the same column we're dragging.
-                // if (dragSrcEl != this) {
-                //     // Set the source column's HTML to the HTML of the column we dropped on.
-                //     dragSrcEl.innerHTML = this.innerHTML;
-                //     this.innerHTML = e.dataTransfer.getData('text/html');
-                // }
+                if (dragSrcEl != this) {
+                    // Set the source column's HTML to the HTML of the column we dropped on.
+                    moveRow(dragSrcEl, parentTable);
+                }
 
                 return false;
             }
