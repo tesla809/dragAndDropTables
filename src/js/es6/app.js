@@ -4,188 +4,198 @@
 // add parameter for toggle features.
 "use strict";
 const app = function() {
-  document.addEventListener("DOMContentLoaded", (event) => {
-  	const $ = require('jquery');
-    console.log("DOM fully loaded and parsed");
-    console.log(`jquery works ${$}`);
+    document.addEventListener("DOMContentLoaded", (event) => {
+        const $ = require('jquery');
+        console.log("DOM fully loaded and parsed");
+        console.log(`jquery works ${$}`);
 
-    const rootUrl = 'https://jsonplaceholder.typicode.com';
-    const mainContentDiv = document.querySelector('div#main-content');
+        const rootUrl = 'https://jsonplaceholder.typicode.com';
+        const mainContentDiv = document.querySelector('div#main-content');
 
-    // drag and drop code
-    //Function handleDragStart(), Its purpose is to store the id of the draggable element.
-	function handleDragStart(e) {
-		e.dataTransfer.setData("text", this.id); //note: using "this" is the same as using: e.target.
-	}
+        const createTable = function(user, album, targetElement) {
+            const populateTable = function(elementObject, propIgnore) {
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'Rtable Rtable--2cols';
 
-	//The dragenter event fires when dragging an object over the target. 
-	//The css class "drag-enter" is append to the targets object.
-	function handleDragEnterLeave(e) {
-		if(e.type == "dragenter") {
-			this.className = "drag-enter" 
-		} else {
-			this.className = "" //Note: "this" referces to the target element where the "dragenter" event is firing from.
-		}
-	}
+                for (let prop in elementObject) {
+                    if (prop !== propIgnore) {
+                        // create columns
+                        let elColumn = document.createElement('div');
+                        elColumn.className = 'Rtable-cell Rtable-cell--head';
+                        // fix order:0 with x using an array if value is an array.
+                        elColumn.style = 'order:0;';
+                        elColumn.id = `${elementObject.id}-${prop}`;
+                        let elColumnH3 = document.createElement('h3');
+                        elColumnH3.innerText = prop.toUpperCase();
+                        elColumn.appendChild(elColumnH3);
 
-	//Function handles dragover event eg.. moving your source div over the target div element.
-	//If drop event occurs, the function retrieves the draggable element’s id from the DataTransfer object.
-	function handleOverDrop(e) {
-		e.preventDefault(); 
-			//Depending on the browser in use, not using the preventDefault() could cause any number of strange default behaviours to occur.
-		if (e.type != "drop") {
-			return; //Means function will exit if no "drop" event is fired.
-		}
-		//Stores dragged elements ID in var draggedId
-		var draggedId = e.dataTransfer.getData("text");
-		//Stores referrence to element being dragged in var draggedEl
-		var draggedEl = document.getElementById(draggedId);
+                        // populate column's rows
+                        let elData = document.createElement('div');
+                        elData.className = 'Rtable-cell';
+                        elData.style = 'order:1;';
+                        elData.innerText = elementObject[prop];
+                        elData.id = `${elementObject.id}-${elementObject[prop]}`;
+                        elData.setAttribute('draggable', 'true');
 
-		//if the event "drop" is fired on the dragged elements original drop target e.i..  it's current parentNode, 
-		//then set it's css class to ="" which will remove dotted lines around the drop target and exit the function.
-		if (draggedEl.parentNode == this) {
-			this.className = "";
-			return; //note: when a return is reached a function exits.
-		}
-		//Otherwise if the event "drop" is fired from a different target element, detach the dragged element node from it's
-		//current drop target (i.e current perantNode) and append it to the new target element. Also remove dotted css class. 
-		draggedEl.parentNode.removeChild(draggedEl);
-		this.appendChild(draggedEl); //Note: "this" references to the current target div that is firing the "drop" event.
-		this.className = "";
-	}
+                        tableContainer.appendChild(elColumn);
+                        tableContainer.appendChild(elData);
+                    }
+                }
+                return tableContainer;
+            }
 
-	//Retrieve two groups of elements, those that are draggable and those that are drop targets:
-	var draggable = document.querySelectorAll('[draggable]')
-	var targets = document.querySelectorAll('[data-drop-target]');
-	//Note: using the document.querySelectorAll() will aquire every element that is using the attribute defind in the (..)
+            // create table
+            const table = document.createElement('div');
+            table.id = `table-${user.name}`;
 
-	//Register event listeners for the"dragstart" event on the draggable elements:
-	for(var i = 0; i < draggable.length; i++) {
-		draggable[i].addEventListener("dragstart", handleDragStart);
-	}
+            // create table's name
+            const userHeader = document.createElement('h3');
+            userHeader.innerText = user.name;
+            userHeader.className = 'user-title';
 
-	//Register event listeners for "dragover", "drop", "dragenter" & "dragleave" events on the drop target elements.
-	for(var i = 0; i < targets.length; i++) {
-		targets[i].addEventListener("dragover", handleOverDrop);
-		targets[i].addEventListener("drop", handleOverDrop);
-		targets[i].addEventListener("dragenter", handleDragEnterLeave);
-		targets[i].addEventListener("dragleave", handleDragEnterLeave);
-	}
-		
+            // populate table
+            const tableInfo = populateTable(album, 'userId');
 
-    const createTable = function(user, album, targetElement){
-    	const populateTable = function(elementObject, propIgnore){
-			const tableContainer = document.createElement('div');
-			tableContainer.className = 'Rtable Rtable--2cols';
-			tableContainer['data-drop-target'] = "true";
+            targetElement.appendChild(userHeader);
+            targetElement.appendChild(table);
+            table.appendChild(tableInfo);
+        }
 
-    		for(let prop in elementObject){
-    			if(prop !== propIgnore){
-    				// create columns
-    				let elColumn = document.createElement('div');
-    				elColumn.className = 'Rtable-cell Rtable-cell--head';
-    				// fix order:0 with x using an array if value is an array.
-    				elColumn.style = 'order:0;';
-    				elColumn.id = `${elementObject}-${prop}`;
-    				let elColumnH3 = document.createElement('h3');
-    				elColumnH3.innerText = prop.toUpperCase();
-    				elColumn.appendChild(elColumnH3);
+        const allAjaxCompleteCB = (user1, user2, album1, album2) => {
+            let dragSrcEl = null;
 
-    				// populate column's rows
-    				let elData = document.createElement('div');
-    				elData.className = 'Rtable-cell';
-    				// dragging feature, might want to toggle it later
-    				elData.style = 'order:1;';
-    				elData.innerText = elementObject[prop];
-    				elData.id = `${elementObject}-${elementObject[prop]}`;
-    				elData.draggable = 'true';
+            function handleDragStart(e) {
+                this.style.opacity = '0.4';
+                this.style.border = '2px dashed #000';
 
-    				tableContainer.appendChild(elColumn);
-    				tableContainer.appendChild(elData);
-    			}
-    		}
-    		return tableContainer;
-    	}
+                dragSrcEl = this;
 
-    	// create table
-    	const table = document.createElement('div');
-    	table.id = `table-${user.name}`;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', this.innerHTML);
+            }
 
-    	const userHeader = document.createElement('h3');
-    	userHeader.innerText = user.name;
-    	userHeader.className = 'user-title';
+            function handleDragOver(e) {
+                // feature detection
+                if (e.preventDefault) {
+                    // allows us to drop
+                    e.preventDefault();
+                }
+                e.dataTransfer.dropEffect = 'move';
+                const parentNode = e.target.parentNode;
+                parentNode.style.backgroundColor = 'rgba(200,50,10,0.1)';
 
-    	const tableInfo = populateTable(album, 'userId');
+                return false;
+            }
 
-    	targetElement.appendChild(userHeader);
-    	targetElement.appendChild(table);
-    	table.appendChild(tableInfo);
-    }
+            function handleDragEnter(e) {
+                // this / e is the current hover target
+                const parentNode = e.target.parentNode;
+                parentNode.style.backgroundColor = 'rgba(200,50,10,0.1)';
 
-    const allAjaxCompleteCB = (user1, user2, album1, album2) => {
-    	console.log('done');
-    	user1 = user1[0];
-    	user2 = user2[0];
-    	album1 = album1[0];
-    	album2 = album2[0];
+                this.classList.add('over');
+                console.log('enter');
+            }
 
-    	const allTablesContainer = document.createElement('div');
-    	allTablesContainer.className = '';
-    	allTablesContainer.id = 'all-table-container';
+            function handleDragLeave(e) {
+                const parentNode = e.target.parentNode;
+                parentNode.style.backgroundColor = 'rgba(112,128,144,.2)';
+                // this / e is the previous hover target
+                this.classList.remove('over');
+                console.log('leave')
+            }
 
-    	// append main table container to mainContent Div
-    	mainContentDiv.appendChild(allTablesContainer);
+            function handleDrop(e) {
+                // this / e is the current hover target
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
 
-    	// create user1 table
-    	createTable(user1, album1, allTablesContainer);
-    	createTable(user2, album2, allTablesContainer);
+                // >>> add the new row feature here <<<
 
-    	// test
-    	console.log(mainContentDiv);
-    }
+                // Don't do anything if dropping the same column we're dragging.
+                if (dragSrcEl != this) {
+                    // Set the source column's HTML to the HTML of the column we dropped on.
+                    dragSrcEl.innerHTML = this.innerHTML;
+                    this.innerHTML = e.dataTransfer.getData('text/html');
+                }
 
+                return false;
+            }
 
-	// make DRY, iterable
-    $.when(
-    	// get users
-    	$.get(rootUrl + "/users/" + '1', function(data) {
-    		console.log( "calling /users/1 ..." );
-    	})
-    		.done(function(){
-    			console.log('call to users/1 a success');
-    		})
-	    	.fail(function(){
-	    		console.log('call to users/1 failed');
-	    	}),
-    	$.get(rootUrl + "/users/" + '2', function(data) {
-    		console.log( "calling /users/2 ..." );
-    	})
-    		.done(function(){
-    			console.log('call to users/2 a success');
-    		})
-	    	.fail(function(){
-	    		console.log('call to users/2 failed');
-	    	}),
-    	// get albums
-    	$.get(rootUrl + "/albums/" + '1', function(data) {
-			console.log( "calling /albums/1 ..." );
-    	})
-    	   .done(function(){
-    			console.log('call to /albums/1 a success');
-    		})
-	    	.fail(function(){
-	    		console.log('call to /albums/1 failed');
-	    	}),
-    	$.get(rootUrl + "/albums/" + '2', function(data) {
-    		console.log( "calling /albums/2 ..." );
-    	})   	   
-    		.done(function(){
-    			console.log('call to /albums/2 a success');
-    		})
-	    	.fail(function(){
-	    		console.log('call to /albums/2 failed');
-	    	}),
-   	).then(allAjaxCompleteCB);
-  });
+            function handleDragEnd(e) {
+                [].forEach.call(rowItems, function(item) {
+                    item.classList.remove('over');
+                });
+            }
 
+            console.log('done');
+            user1 = user1[0];
+            user2 = user2[0];
+            album1 = album1[0];
+            album2 = album2[0];
+
+            // create user1 table
+            createTable(user1, album1, mainContentDiv);
+            createTable(user2, album2, mainContentDiv);
+
+            // test
+            console.log(mainContentDiv);
+
+            const test = document.createElement('div');
+            mainContentDiv.appendChild(test);
+
+            const rowItems = document.querySelectorAll('.Rtable-cell');
+            // change to for statment
+            [].forEach.call(rowItems, function(item) {
+                item.addEventListener('dragstart', handleDragStart, false);
+                item.addEventListener('dragenter', handleDragEnter, false);
+                item.addEventListener('dragover', handleDragOver, false);
+                item.addEventListener('dragleave', handleDragLeave, false);
+                item.addEventListener('drop', handleDrop, false);
+                item.addEventListener('dragend', handleDragEnd, false);
+            });
+        }
+
+        // make DRY, iterable
+        $.when(
+            // get users
+            $.get(rootUrl + "/users/" + '1', function(data) {
+                console.log("calling /users/1 ...");
+            })
+            .done(function() {
+                console.log('call to users/1 a success');
+            })
+            .fail(function() {
+                console.log('call to users/1 failed');
+            }),
+            $.get(rootUrl + "/users/" + '2', function(data) {
+                console.log("calling /users/2 ...");
+            })
+            .done(function() {
+                console.log('call to users/2 a success');
+            })
+            .fail(function() {
+                console.log('call to users/2 failed');
+            }),
+            // get albums
+            $.get(rootUrl + "/albums/" + '1', function(data) {
+                console.log("calling /albums/1 ...");
+            })
+            .done(function() {
+                console.log('call to /albums/1 a success');
+            })
+            .fail(function() {
+                console.log('call to /albums/1 failed');
+            }),
+            $.get(rootUrl + "/albums/" + '2', function(data) {
+                console.log("calling /albums/2 ...");
+            })
+            .done(function() {
+                console.log('call to /albums/2 a success');
+            })
+            .fail(function() {
+                console.log('call to /albums/2 failed');
+            }),
+        ).then(allAjaxCompleteCB);
+    });
 }();
