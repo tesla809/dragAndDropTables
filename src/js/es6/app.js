@@ -15,15 +15,28 @@ const app = function() {
         const createTable = function(user, album, targetElement) {
             const populateTable = function(elementObject, propIgnore) {
                 const tableContainer = document.createElement('div');
-                tableContainer.className = 'Rtable Rtable--2cols';
+                tableContainer.className = 'Table';
 
+                let rowHeader = document.createElement('div');
+                rowHeader.className = 'Table-row Table-header';
+                rowHeader.id = 'row-header';
+
+                let rowData = document.createElement('div');
+                rowData.className = 'Table-row';
+                rowData.id = 'row-data';
+
+                // create an array of elements,
+                // the odd ones are added as headers
+                // the even ones are added as values
+                // if more than one value as value, added as an multi dimensional array
+                let elArray  = [];
                 for (let prop in elementObject) {
                     if (prop !== propIgnore) {
                         // create columns
                         let elColumn = document.createElement('div');
-                        elColumn.className = 'Rtable-cell Rtable-cell--head';
-                        // fix order:0 with x using an array if value is an array.
-                        elColumn.style = 'order:0;';
+                        elColumn.className = 'Table-row-item Rtable-cell Rtable-cell--head';
+                        // // fix order:0 with x using an array if value is an array.
+                        // elColumn.style = 'order:0;';
                         elColumn.id = `${elementObject.id}-${prop}`;
                         let elColumnH3 = document.createElement('h3');
                         elColumnH3.innerText = prop.toUpperCase();
@@ -31,16 +44,30 @@ const app = function() {
 
                         // populate column's rows
                         let elData = document.createElement('div');
-                        elData.className = 'Rtable-cell';
-                        elData.style = 'order:1;';
+                        elData.className = 'Table-row-item Rtable-cell';
+                        // elData.style = 'order:1;';
                         elData.innerText = elementObject[prop];
                         elData.id = `${elementObject.id}-${elementObject[prop]}`;
                         elData.setAttribute('draggable', 'true');
 
-                        tableContainer.appendChild(elColumn);
-                        tableContainer.appendChild(elData);
+                        elArray.push(elColumn);
+                        elArray.push(elData);
                     }
                 }
+
+                // since key values come in pairs, 
+                // then header will be divisible by 2 aka even
+                // value will be odd
+                for(let x = 0; x < elArray.length; x++){
+                	if(x % 2 === 0){
+                		rowHeader.appendChild(elArray[x]);
+                	} else {
+                		rowData.appendChild(elArray[x]);
+                	}
+                }
+
+                tableContainer.appendChild(rowHeader);
+                tableContainer.appendChild(rowData);
                 return tableContainer;
             }
 
@@ -59,6 +86,14 @@ const app = function() {
             targetElement.appendChild(userHeader);
             targetElement.appendChild(table);
             table.appendChild(tableInfo);
+        }
+
+        function newRow(el, targetElement){
+        	const row = document.createElement('div');
+        	row.innerText = el.innerText;
+
+        	targetElement.appendChild(row);
+        	console.log('new row');
         }
 
         const allAjaxCompleteCB = (user1, user2, album1, album2) => {
@@ -111,13 +146,18 @@ const app = function() {
                 }
 
                 // >>> add the new row feature here <<<
+                console.log('dragSrcEl',dragSrcEl);
+                console.log('e.target.parentNode',e.target.parentNode);
 
-                // Don't do anything if dropping the same column we're dragging.
-                if (dragSrcEl != this) {
-                    // Set the source column's HTML to the HTML of the column we dropped on.
-                    dragSrcEl.innerHTML = this.innerHTML;
-                    this.innerHTML = e.dataTransfer.getData('text/html');
-                }
+                const parentTable = e.target.parentNode;
+                newRow(dragSrcEl, parentTable);
+
+                // // Don't do anything if dropping the same column we're dragging.
+                // if (dragSrcEl != this) {
+                //     // Set the source column's HTML to the HTML of the column we dropped on.
+                //     dragSrcEl.innerHTML = this.innerHTML;
+                //     this.innerHTML = e.dataTransfer.getData('text/html');
+                // }
 
                 return false;
             }
