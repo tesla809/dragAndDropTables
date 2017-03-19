@@ -142,8 +142,11 @@ const app = function() {
 	    		return result;
     		}
     		let tables = mainContentDiv.querySelectorAll('.Table');
-    		console.log(tables);
-
+    		let totalTables = [];
+    		for(let x = 0; x < tables.length; x++){
+    			totalTables.push(getUpdatedData(tables[x]));
+    		}
+    		return totalTables;
         }
 
         function getStyle(element, property){
