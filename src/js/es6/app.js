@@ -105,24 +105,45 @@ const app = function() {
         }
 
         function updateData(){
+        	function getUpdatedData(table){
+    			let prop = table.querySelectorAll('.Table-header > .Table-row-item');
+	    		let value = table.querySelectorAll('.row-data > .Table-row-item');
+	    	
+	    		let columnPropArr = [];
+	    		// idArr and titleArr go into rowValueArr
+	    		let rowValueArr = [];
+	    		let idArr = [];
+	    		let titleArr = [];
+	    		// final table
+	    		let result = {};
+
+	    		// get column ids
+	    		for(let x = 0; x < prop.length; x++){
+	    			let property = prop[x].innerText.toLowerCase();
+	    			property = property.substring(0,property.length - 1);
+	    			columnPropArr.push(property);
+	    		}
+	    		// get and sort value data
+	    		for (let x = 0; x < value.length; x ++) {
+	    			if(x % 2 === 0){
+		    		    idArr.push(value[x].innerText);
+	    			} else {
+	    				titleArr.push(value[x].innerText);
+	    			}
+	    		}
+	    		rowValueArr.push(idArr);
+	    		rowValueArr.push(titleArr);
+	    		for (let x = 0; x < columnPropArr.length; x++){
+	    			console.log(columnPropArr[x], rowValueArr[x]);
+	    			result[columnPropArr[x]] = rowValueArr[x];
+	    		}
+
+	    		console.log(result);
+	    		return result;
+    		}
     		let tables = mainContentDiv.querySelectorAll('.Table');
-    		let prop = tables[0].querySelectorAll('.Table-header > .Table-row-item');
-    		let value = tables[0].querySelectorAll('.row-data > .Table-row-item');
-    		let propArr = [];
-    		let valueArr = [];
+    		console.log(tables);
 
-    		for(let x = 0; x < prop.length; x++){
-    			let property = prop[x].innerText.toLowerCase();
-    			property = property.substring(0,property.length - 1);
-    			propArr.push(property);
-    		}
-    		for(let x = 0; x < value.length; x++){
-    			console.log(value[x].innerText);
-    			valueArr.push(value[x].innerText);
-    		}
-
-    		console.log(propArr);
-    		console.log(valueArr);
         }
 
         function getStyle(element, property){
