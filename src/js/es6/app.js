@@ -23,8 +23,7 @@ const app = function() {
                 rowHeader.id = 'row-header';
 
                 let rowData = document.createElement('div');
-                rowData.className = 'Table-row';
-                rowData.id = 'row-data';
+                rowData.className = 'Table-row row-data';
 
                 // create an array of elements,
                 // the odd ones are added as headers
@@ -36,8 +35,6 @@ const app = function() {
                         // create columns
                         let elColumn = document.createElement('div');
                         elColumn.className = 'Table-row-item Rtable-cell Rtable-cell--head';
-                        // // fix order:0 with x using an array if value is an array.
-                        // elColumn.style = 'order:0;';
                         elColumn.id = `${elementObject.id}-${prop}`;
                         let elColumnH3 = document.createElement('h3');
                         elColumnH3.innerText = prop.toUpperCase();
@@ -46,7 +43,6 @@ const app = function() {
                         // populate column's rows
                         let elData = document.createElement('div');
                         elData.className = 'Table-row-item Rtable-cell';
-                        // elData.style = 'order:1;';
                         elData.innerText = elementObject[prop];
                         elData.id = `${elementObject.id}-${elementObject[prop]}`;
                         elData.setAttribute('draggable', 'true');
@@ -100,12 +96,33 @@ const app = function() {
             	headers: headers
             }
         }
-
         function moveRow(el, targetElement){
         	const targetRow = el.parentNode;
-        	targetRow.className = 'Table-row';
+        	targetRow.className = 'Table-row row-data';
         	const elRowChildren = el.parentNode.children;
-        	targetElement.appendChild(targetRow);	
+        	targetElement.appendChild(targetRow);
+        	return targetElement;
+        }
+
+        function updateData(){
+    		let tables = mainContentDiv.querySelectorAll('.Table');
+    		let prop = tables[0].querySelectorAll('.Table-header > .Table-row-item');
+    		let value = tables[0].querySelectorAll('.row-data > .Table-row-item');
+    		let propArr = [];
+    		let valueArr = [];
+
+    		for(let x = 0; x < prop.length; x++){
+    			let property = prop[x].innerText.toLowerCase();
+    			property = property.substring(0,property.length - 1);
+    			propArr.push(property);
+    		}
+    		for(let x = 0; x < value.length; x++){
+    			console.log(value[x].innerText);
+    			valueArr.push(value[x].innerText);
+    		}
+
+    		console.log(propArr);
+    		console.log(valueArr);
         }
 
         function getStyle(element, property){
@@ -114,8 +131,10 @@ const app = function() {
 
         const allAjaxCompleteCB = (user1, user2, album1, album2) => {
             let dragSrcEl = null;
+            console.log(user1[0]);
 
-            const defaultBackground = 'rgba(112,128,144,.2)';
+            const defaultHeaderBackground = 'rgba(242,242,242, 0.8)';
+            const defaultBackground = 'rgba(242,242,242, 0.3)';
             const defaultBorder = '';
             const defaultOpacity = '1';
 
@@ -123,7 +142,7 @@ const app = function() {
             const selectedBorder = '2px dashed #000';
             const selectedOpacity = '0.4';
 
-            const oddBackgroundColor = 'rbga(205,192,176,0.5)';
+            const evenBackgroundColor = '#ffffff';
 
 
             function handleDragStart(e) {
@@ -145,6 +164,10 @@ const app = function() {
                     e.preventDefault();
                 }
                 e.dataTransfer.dropEffect = 'move';
+
+                const parentNode = e.target.parentNode;
+                parentNode.style.backgroundColor = selectedBackground;
+
                 return false;
             }
 
@@ -161,7 +184,11 @@ const app = function() {
                 this.classList.remove('over');
                 // color change
                 const parentNode = e.target.parentNode;
-                parentNode.style.backgroundColor = defaultBackground;
+                if(parentNode.classList.contains('Table-header')){
+                	parentNode.style.backgroundColor = defaultHeaderBackground;
+                } else {
+                	parentNode.style.backgroundColor = defaultBackground;
+                }
             }
 
             function handleDrop(e) {
@@ -175,8 +202,12 @@ const app = function() {
                 // >>> add the new row feature here <<<
                     moveRow(dragSrcEl, parentTable);
                 }
-                parentTable.style.backgroundColor = defaultBackground;
-                parentTable.firstChild.style.backgroundColor = defaultBackground;
+
+                if (parentNode.classList.contains('Table-header')){
+                	parentNode.style.backgroundColor = defaultHeaderBackground;
+                } else {
+                	parentNode.style.backgroundColor = defaultBackground;
+                }
                 return false;
             }
 
@@ -192,20 +223,17 @@ const app = function() {
                 elements.targetRow.style.border = defaultBorder;
                 elements.targetRow.style.opacity = defaultOpacity;
 
-                for(let x = 1; x < elements.table.children.length; x++){
-                	console.log(elements.table.children[x]);
-                	if(x % 2 === 0){
-                		elements.table.children[x].style.backgroundColor = 'white';
-                	} else {
-                		elements.table.children[x].style.backgroundColor = defaultBackground;
-                	}
-                }
-
-                for(let x = 1; x < elements.table.children.length; x++){
-                	console.log(elements.table.children[x]);
-                }
-
-                dragSrcEl.style.backgroundColor = defaultBackground;
+                elements.headers.style.backgroundColor = defaultHeaderBackground;
+				if (elements.table.children.length > 1) {
+				    for (let x = 1; x < elements.table.children.length; x++) {
+				        if (x % 2 === 0) {
+				            elements.table.children[x].style.backgroundColor = evenBackgroundColor;
+				        } else {
+				            elements.table.children[x].style.backgroundColor = defaultBackground;
+				        }
+				    }
+				}
+				updateData();
 				console.log('end!');				
             }
 
