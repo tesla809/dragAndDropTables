@@ -233,6 +233,7 @@ const app = function() {
 				}
 				// gets new data from updated data;
 				newData = updateData(e);
+				sendData(newData);
 				console.log('end!');				
             }
 
@@ -250,6 +251,7 @@ const app = function() {
 	        	function getUpdatedData(table){
 	    			let prop = table.querySelectorAll('.Table-header > .Table-row-item');
 		    		let value = table.querySelectorAll('.row-data > .Table-row-item');
+		    		let tableName = table.parentNode.previousSibling.innerText;
 		    	
 		    		let columnPropArr = [];
 		    		// idArr and titleArr go into rowValueArr
@@ -279,10 +281,11 @@ const app = function() {
 		    			result[columnPropArr[x]] = rowValueArr[x];
 		    		}
 
-		    		console.log(result);
-		    		return result;
+		    		return {
+		    			tableName: tableName,  
+		    			table: result
+		    		}
 	    		}
-
 	    		let targetRow = e.target.parentNode;
 	    		let parentTable = targetRow.parentNode;
 	    		let destinationTable = getUpdatedData(parentTable);
@@ -295,9 +298,19 @@ const app = function() {
 	    		console.log(updatedTables);
 	    		return updatedTables;
 	        }
+
+	        function sendData(data){
+	        	console.log('sendData data');
+	        	console.log(data);
+				// $.ajax({
+				//   type: "POST",
+				//   url: url,
+				//   data: data,
+				//   success: success,
+				//   dataType: dataType
+				// });
+	        }
         }
-
-
 
         // ajax call
         // make DRY, iterable
