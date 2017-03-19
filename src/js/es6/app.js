@@ -145,10 +145,6 @@ const app = function() {
                     e.preventDefault();
                 }
                 e.dataTransfer.dropEffect = 'move';
-
-                // color change
-                const parentNode = e.target.parentNode;
-                parentNode.style.backgroundColor = selectedBackground;
                 return false;
             }
 
@@ -174,10 +170,13 @@ const app = function() {
                     e.stopPropagation();
                 }
                 const parentTable = e.target.parentNode.parentNode;
+                const parentNode = e.target.parentNode;
                 if (dragSrcEl != this) {
                 // >>> add the new row feature here <<<
                     moveRow(dragSrcEl, parentTable);
                 }
+                parentTable.style.backgroundColor = defaultBackground;
+                parentTable.firstChild.style.backgroundColor = defaultBackground;
                 return false;
             }
 
@@ -192,8 +191,6 @@ const app = function() {
                 elements.targetRow.style.backgroundColor = defaultBackground;
                 elements.targetRow.style.border = defaultBorder;
                 elements.targetRow.style.opacity = defaultOpacity;
-                
-
 
                 for(let x = 1; x < elements.table.children.length; x++){
                 	console.log(elements.table.children[x]);
