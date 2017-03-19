@@ -1,6 +1,7 @@
 // technical debt:
 // refactor populateTable- seperate columns and rows creation
 // make $.when more DRY
+// make this more modular
 // add parameter for toggle features.
 "use strict";
 const app = function() {
@@ -88,6 +89,18 @@ const app = function() {
             table.appendChild(tableInfo);
         }
 
+        function getTableElements(e){
+            const targetRow = e.target.parentNode;
+            const table = e.target.parentNode.parentNode;
+            const headers = table.firstChild;
+
+            return {
+            	targetRow: targetRow,
+            	table: table,
+            	headers: headers
+            }
+        }
+
         function moveRow(el, targetElement){
         	const targetRow = el.parentNode;
         	targetRow.className = 'Table-row';
@@ -95,16 +108,31 @@ const app = function() {
         	targetElement.appendChild(targetRow);	
         }
 
+        function getStyle(element, property){
+        	return window.getComputedStyle(element, null).getPropertyValue(property);
+        }
+
         const allAjaxCompleteCB = (user1, user2, album1, album2) => {
             let dragSrcEl = null;
 
+            const defaultBackground = 'rgba(112,128,144,.2)';
+            const defaultBorder = '';
+            const defaultOpacity = '1';
+
+            const selectedBackground = 'rgba(200,50,10,0.1)';
+            const selectedBorder = '2px dashed #000';
+            const selectedOpacity = '0.4';
+
+            const oddBackgroundColor = 'rbga(205,192,176,0.5)';
+
+
             function handleDragStart(e) {
-	        	const targetRow = e.target.parentNode;
+	        	const targetRow = getTableElements(e).targetRow;
 
-        		targetRow.style.opacity = '0.4';
-                targetRow.style.border = '2px dashed #000';
+        		targetRow.style.opacity = selectedOpacity;
+                targetRow.style.border = selectedBorder;
 
-                dragSrcEl = this;
+               	dragSrcEl = this;
 
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/html', this.innerHTML);
@@ -117,27 +145,27 @@ const app = function() {
                     e.preventDefault();
                 }
                 e.dataTransfer.dropEffect = 'move';
-                const parentNode = e.target.parentNode;
-                parentNode.style.backgroundColor = 'rgba(200,50,10,0.1)';
 
+                // color change
+                const parentNode = e.target.parentNode;
+                parentNode.style.backgroundColor = selectedBackground;
                 return false;
             }
 
             function handleDragEnter(e) {
                 // this / e is the current hover target
-                const parentNode = e.target.parentNode;
-                parentNode.style.backgroundColor = 'rgba(200,50,10,0.1)';
-
                 this.classList.add('over');
-                console.log('enter');
+                // color change
+                const parentNode = e.target.parentNode;
+                parentNode.style.backgroundColor = selectedBackground;
             }
 
             function handleDragLeave(e) {
-                const parentNode = e.target.parentNode;
-                parentNode.style.backgroundColor = 'rgba(112,128,144,.2)';
                 // this / e is the previous hover target
                 this.classList.remove('over');
-                console.log('leave')
+                // color change
+                const parentNode = e.target.parentNode;
+                parentNode.style.backgroundColor = defaultBackground;
             }
 
             function handleDrop(e) {
@@ -145,18 +173,11 @@ const app = function() {
                 if (e.stopPropagation) {
                     e.stopPropagation();
                 }
-
-                // >>> add the new row feature here <<<
-                console.log('dragSrcEl', dragSrcEl);
-                console.log('e.target.parentNode', e.target.parentNode);
-
                 const parentTable = e.target.parentNode.parentNode;
-
                 if (dragSrcEl != this) {
-                    // Set the source column's HTML to the HTML of the column we dropped on.
+                // >>> add the new row feature here <<<
                     moveRow(dragSrcEl, parentTable);
                 }
-
                 return false;
             }
 
@@ -164,6 +185,31 @@ const app = function() {
                 [].forEach.call(rowItems, function(item) {
                     item.classList.remove('over');
                 });
+
+                const elements = getTableElements(e);
+                const post = []
+
+                elements.targetRow.style.backgroundColor = defaultBackground;
+                elements.targetRow.style.border = defaultBorder;
+                elements.targetRow.style.opacity = defaultOpacity;
+                
+
+
+                for(let x = 1; x < elements.table.children.length; x++){
+                	console.log(elements.table.children[x]);
+                	if(x % 2 === 0){
+                		elements.table.children[x].style.backgroundColor = 'white';
+                	} else {
+                		elements.table.children[x].style.backgroundColor = defaultBackground;
+                	}
+                }
+
+                for(let x = 1; x < elements.table.children.length; x++){
+                	console.log(elements.table.children[x]);
+                }
+
+                dragSrcEl.style.backgroundColor = defaultBackground;
+				console.log('end!');				
             }
 
             console.log('done');
