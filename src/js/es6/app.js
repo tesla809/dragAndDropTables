@@ -105,53 +105,6 @@ const app = function() {
         	return targetElement;
         }
 
-        function updateData(){
-        	function getUpdatedData(table){
-    			let prop = table.querySelectorAll('.Table-header > .Table-row-item');
-	    		let value = table.querySelectorAll('.row-data > .Table-row-item');
-	    	
-	    		let columnPropArr = [];
-	    		// idArr and titleArr go into rowValueArr
-	    		let rowValueArr = [];
-	    		let idArr = [];
-	    		let titleArr = [];
-	    		// final table
-	    		let result = {};
-
-	    		// get column ids
-	    		for(let x = 0; x < prop.length; x++){
-	    			let property = prop[x].innerText.toLowerCase();
-	    			// eliminate extra line at end of string
-	    			property = property.replace(/(\r\n|\n|\r)/gm,"");	    			
-	    			// property = property.substring(0,property.length - 1);
-	    			columnPropArr.push(property);
-	    		}
-	    		// get and sort value data
-	    		for (let x = 0; x < value.length; x ++) {
-	    			if(x % 2 === 0){
-		    		    idArr.push(value[x].innerText);
-	    			} else {
-	    				titleArr.push(value[x].innerText);
-	    			}
-	    		}
-	    		rowValueArr.push(idArr);
-	    		rowValueArr.push(titleArr);
-	    		for (let x = 0; x < columnPropArr.length; x++){
-	    			console.log(columnPropArr[x], rowValueArr[x]);
-	    			result[columnPropArr[x]] = rowValueArr[x];
-	    		}
-
-	    		console.log(result);
-	    		return result;
-    		}
-    		let tables = mainContentDiv.querySelectorAll('.Table');
-    		let totalTables = [];
-    		for(let x = 0; x < tables.length; x++){
-    			totalTables.push(getUpdatedData(tables[x]));
-    		}
-    		return totalTables;
-        }
-
         function getStyle(element, property){
         	return window.getComputedStyle(element, null).getPropertyValue(property);
         }
@@ -159,6 +112,10 @@ const app = function() {
         const allAjaxCompleteCB = (user1, user2, album1, album2) => {
         	// the dragged source element
             let dragSrcEl = null;
+             // dragStart
+            // higher scope variable to get origin table in dragStart
+           	let dragStartOrigin = null;
+
             // is assigned new data of tables after drag and drop is complete
             let newData = null;
 
@@ -195,6 +152,10 @@ const app = function() {
                	dragSrcEl = this;
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/html', this.innerHTML);
+                
+                // get origin table
+                dragStartOrigin = getTableElements(e).table;
+                console.log('orign table', dragStartOrigin);
             }
 
             function handleDragOver(e) {
@@ -271,7 +232,7 @@ const app = function() {
 				    }
 				}
 				// gets new data from updated data;
-				newData = updateData();
+				newData = updateData(e);
 				console.log('end!');				
             }
 
@@ -284,7 +245,59 @@ const app = function() {
                 item.addEventListener('drop', handleDrop, false);
                 item.addEventListener('dragend', handleDragEnd, false);
             });
+
+	        function updateData(e){
+	        	function getUpdatedData(table){
+	    			let prop = table.querySelectorAll('.Table-header > .Table-row-item');
+		    		let value = table.querySelectorAll('.row-data > .Table-row-item');
+		    	
+		    		let columnPropArr = [];
+		    		// idArr and titleArr go into rowValueArr
+		    		let rowValueArr = [];
+		    		let idArr = [];
+		    		let titleArr = [];
+		    		// final table
+		    		let result = {};
+		    		// get column ids
+		    		for(let x = 0; x < prop.length; x++){
+		    			let property = prop[x].innerText.toLowerCase();
+		    			// eliminate extra line at end of string
+		    			property = property.replace(/(\r\n|\n|\r)/gm,"");
+		    			columnPropArr.push(property);
+		    		}
+		    		// get and sort value data
+		    		for (let x = 0; x < value.length; x ++) {
+		    			if(x % 2 === 0){
+			    		    idArr.push(value[x].innerText);
+		    			} else {
+		    				titleArr.push(value[x].innerText);
+		    			}
+		    		}
+		    		rowValueArr.push(idArr);
+		    		rowValueArr.push(titleArr);
+		    		for (let x = 0; x < columnPropArr.length; x++){
+		    			result[columnPropArr[x]] = rowValueArr[x];
+		    		}
+
+		    		console.log(result);
+		    		return result;
+	    		}
+
+	    		let targetRow = e.target.parentNode;
+	    		let parentTable = targetRow.parentNode;
+	    		let destinationTable = getUpdatedData(parentTable);
+	    		let originTable = getUpdatedData(dragStartOrigin);
+
+	    		let updatedTables = {
+	    			sender: originTable,
+	    			reciever: destinationTable
+	    		}
+	    		console.log(updatedTables);
+	    		return updatedTables;
+	        }
         }
+
+
 
         // ajax call
         // make DRY, iterable
