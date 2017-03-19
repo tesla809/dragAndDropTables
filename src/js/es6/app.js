@@ -3,6 +3,7 @@
 // make $.when more DRY
 // make this more modular
 // add parameter for toggle features.
+// refactor drag and drop functions as a general re-usable library
 "use strict";
 const app = function() {
     document.addEventListener("DOMContentLoaded", (event) => {
@@ -120,7 +121,9 @@ const app = function() {
 	    		// get column ids
 	    		for(let x = 0; x < prop.length; x++){
 	    			let property = prop[x].innerText.toLowerCase();
-	    			property = property.substring(0,property.length - 1);
+	    			// eliminate extra line at end of string
+	    			property = property.replace(/(\r\n|\n|\r)/gm,"");	    			
+	    			// property = property.substring(0,property.length - 1);
 	    			columnPropArr.push(property);
 	    		}
 	    		// get and sort value data
@@ -154,8 +157,10 @@ const app = function() {
         }
 
         const allAjaxCompleteCB = (user1, user2, album1, album2) => {
+        	// the dragged source element
             let dragSrcEl = null;
-            console.log(user1[0]);
+            // is assigned new data of tables after drag and drop is complete
+            let newData = null;
 
             const defaultHeaderBackground = 'rgba(242,242,242, 0.8)';
             const defaultBackground = 'rgba(242,242,242, 0.3)';
@@ -168,15 +173,26 @@ const app = function() {
 
             const evenBackgroundColor = '#ffffff';
 
+            console.log('done');
+            user1 = user1[0];
+            user2 = user2[0];
+            album1 = album1[0];
+            album2 = album2[0];
 
+            // create user1 table
+            createTable(user1, album1, mainContentDiv);
+            createTable(user2, album2, mainContentDiv);
+
+            const rowItems = document.querySelectorAll('.Rtable-cell');
+            // test
+            console.log(mainContentDiv);
+
+            // drag functions for event handlers - hoists to the top
             function handleDragStart(e) {
 	        	const targetRow = getTableElements(e).targetRow;
-
         		targetRow.style.opacity = selectedOpacity;
                 targetRow.style.border = selectedBorder;
-
                	dragSrcEl = this;
-
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/html', this.innerHTML);
             }
@@ -188,10 +204,8 @@ const app = function() {
                     e.preventDefault();
                 }
                 e.dataTransfer.dropEffect = 'move';
-
                 const parentNode = e.target.parentNode;
                 parentNode.style.backgroundColor = selectedBackground;
-
                 return false;
             }
 
@@ -226,7 +240,6 @@ const app = function() {
                 // >>> add the new row feature here <<<
                     moveRow(dragSrcEl, parentTable);
                 }
-
                 if (parentNode.classList.contains('Table-header')){
                 	parentNode.style.backgroundColor = defaultHeaderBackground;
                 } else {
@@ -257,28 +270,12 @@ const app = function() {
 				        }
 				    }
 				}
-				updateData();
+				// gets new data from updated data;
+				newData = updateData();
 				console.log('end!');				
             }
 
-            console.log('done');
-            user1 = user1[0];
-            user2 = user2[0];
-            album1 = album1[0];
-            album2 = album2[0];
-
-            // create user1 table
-            createTable(user1, album1, mainContentDiv);
-            createTable(user2, album2, mainContentDiv);
-
-            // test
-            console.log(mainContentDiv);
-
-            const test = document.createElement('div');
-            mainContentDiv.appendChild(test);
-
-            const rowItems = document.querySelectorAll('.Rtable-cell');
-            // change to for statment
+            // add event handlers for dragging.
             [].forEach.call(rowItems, function(item) {
                 item.addEventListener('dragstart', handleDragStart, false);
                 item.addEventListener('dragenter', handleDragEnter, false);
@@ -289,6 +286,7 @@ const app = function() {
             });
         }
 
+        // ajax call
         // make DRY, iterable
         $.when(
             // get users
