@@ -9,7 +9,6 @@ const app = function() {
     document.addEventListener("DOMContentLoaded", (event) => {
         const $ = require('jquery');
         console.log("DOM fully loaded and parsed");
-        console.log(`jquery works ${$}`);
         const rootUrl = 'https://jsonplaceholder.typicode.com';
         const mainContentDiv = document.querySelector('div#main-content');
 
@@ -71,6 +70,7 @@ const app = function() {
             // create table
             const table = document.createElement('div');
             table.id = `table-${user.name}`;
+            table.setAttribute('user-id', user.id);
 
             // create table's name
             const userHeader = document.createElement('h3');
@@ -120,6 +120,9 @@ const app = function() {
             // is assigned new data of tables after drag and drop is complete
             let newData = null;
 
+            // user Id
+            let userId = null;
+
             const defaultHeaderBackground = 'rgba(242,242,242, 0.8)';
             const defaultBackground = 'rgba(242,242,242, 0.3)';
             const defaultBorder = '';
@@ -157,8 +160,6 @@ const app = function() {
                 // get origin table
                 dragStartOrigin = getTableElements(e).table;
                 originalElData = getUpdatedData(dragStartOrigin);
-                console.log('say this and ');
-                console.log(originalElData);
             }
 
             function handleDragOver(e) {
@@ -261,13 +262,15 @@ const app = function() {
 	    			senderOriginal: originalElData,
 	    			reciever: destinationTable
 	    		}
+	    		console.log('>>>//>>> here! <<<//<<<');
+	    		console.log(updatedTables);
 	    		return updatedTables;
 	        }
 			function getUpdatedData(table){
 				let prop = table.querySelectorAll('.Table-header > .Table-row-item');
 				let value = table.querySelectorAll('.row-data > .Table-row-item');
 				let tableName = table.parentNode.previousSibling.innerText;
-
+				let userId = table.parentNode.getAttribute('user-id');
 				let columnPropArr = [];
 				// idArr and titleArr go into rowValueArr
 				let rowValueArr = [];
@@ -299,46 +302,67 @@ const app = function() {
 
 				return {
 					tableName: tableName,  
-					table: result
+					table: result,
+					userId: userId
 				}
 			}
-	        function sendData(data){
-	        	console.log('sendData data');
-	        	console.log('sender', data.sender);
-	        	console.log('reciever', data.reciever);
-	        	putData(data.reciever);
-	        	putData(data.sender);
+	        function sendData(dataObj){
+	        	putData(dataObj.reciever);
+	        	deleteData(dataObj.senderOriginal);
+	        	// update user with new album lists
+	        	function putData(dataSend){
+	        		console.log('dataSend');
+	        		console.log(dataSend);
+	        		let dataExport = {
+						id: dataSend.table.id,
+				    	title: dataSend.table.title,
+				    	userId: dataSend.userId
+					};
 
-	        	function putData(data){
-	        		const dataLength = data.table.length;
-	        		const dataToSend = data.table;
-	        		const dataJSON = JSON.stringify(dataToSend);
-	        		const dataId = data.table.id[0];
-	        		if(dataLength !== 0){
-	        			$.ajax({
-						    url: rootUrl + `/posts/${dataId}`,
-						    type:'PUT',
-						    data: {
-						    	userId: JSON.stringify(data.table.id),
-						    	id: JSON.stringify(data.table.id)
-						    },
-						    dataType: 'json',
-						    success: function() {
-						    	// I could add a svg that spins or a check mark
-						    	// that appears
-						       console.log(`data sent! - ${dataJSON}`);
-						   }
-						}).then(function(data){
-							console.log(`This is the data sent:`);
-							console.log(data);
-						});
-	        		} else {
-	        			console.log('data is 0', dataLength);
-	        		}
+        			$.ajax({
+					    url: rootUrl + `/posts/${dataExport.userId}`,
+					    type:'PUT',
+					    data: {
+					    	id: JSON.stringify(dataExport.id),
+					    	title: JSON.stringify(dataExport.title)
+					    },
+					    dataType: 'json',
+					    success: function() {
+					    	// I could add a svg that spins or a check mark
+					    	// that appears
+					       console.log(`data sent!`);
+					   }
+					}).then(function(data){
+						console.log(`This is the data sent:`);
+						console.log(data);
+					});
+	        	}
+	        	function deleteData(dataDelete){
+	        		let dataExport = {
+						id: dataDelete.table.id,
+						title: dataDelete.table.title,
+						userId: dataDelete.userId
+					};
+		    		$.ajax({
+					    url: rootUrl + `/posts/${dataExport.userId}`,
+					    type:'DELETE',
+					    data: {
+					    	id: '',
+					    	title: ''
+					    },
+					    dataType: 'json',
+					    success: function() {
+					    	// I could add a svg that spins or a check mark
+					    	// that appears
+					       console.log(`data deleted!`);
+					   }
+					}).then(function(data){
+						console.log(`This is the data deleted:`);
+						console.log(dataExport);
+					});
 	        	}
 	        }
         }
-
         // ajax call
         // make DRY, iterable
         $.when(
