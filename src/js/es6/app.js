@@ -10,7 +10,6 @@ const app = function() {
         const $ = require('jquery');
         console.log("DOM fully loaded and parsed");
         console.log(`jquery works ${$}`);
-
         const rootUrl = 'https://jsonplaceholder.typicode.com';
         const mainContentDiv = document.querySelector('div#main-content');
 
@@ -108,13 +107,15 @@ const app = function() {
         function getStyle(element, property){
         	return window.getComputedStyle(element, null).getPropertyValue(property);
         }
-
         const allAjaxCompleteCB = (user1, user2, album1, album2) => {
         	// the dragged source element
             let dragSrcEl = null;
              // dragStart
             // higher scope variable to get origin table in dragStart
            	let dragStartOrigin = null;
+
+           	// original data before its moved;
+           	let originalElData = null;
 
             // is assigned new data of tables after drag and drop is complete
             let newData = null;
@@ -155,7 +156,7 @@ const app = function() {
                 
                 // get origin table
                 dragStartOrigin = getTableElements(e).table;
-                console.log('orign table', dragStartOrigin);
+                originalElData = getUpdatedData(dragStartOrigin);
             }
 
             function handleDragOver(e) {
@@ -248,44 +249,6 @@ const app = function() {
             });
 
 	        function updateData(e){
-	        	function getUpdatedData(table){
-	    			let prop = table.querySelectorAll('.Table-header > .Table-row-item');
-		    		let value = table.querySelectorAll('.row-data > .Table-row-item');
-		    		let tableName = table.parentNode.previousSibling.innerText;
-		    	
-		    		let columnPropArr = [];
-		    		// idArr and titleArr go into rowValueArr
-		    		let rowValueArr = [];
-		    		let idArr = [];
-		    		let titleArr = [];
-		    		// final table
-		    		let result = {};
-		    		// get column ids
-		    		for(let x = 0; x < prop.length; x++){
-		    			let property = prop[x].innerText.toLowerCase();
-		    			// eliminate extra line at end of string
-		    			property = property.replace(/(\r\n|\n|\r)/gm,"");
-		    			columnPropArr.push(property);
-		    		}
-		    		// get and sort value data
-		    		for (let x = 0; x < value.length; x ++) {
-		    			if(x % 2 === 0){
-			    		    idArr.push(value[x].innerText);
-		    			} else {
-		    				titleArr.push(value[x].innerText);
-		    			}
-		    		}
-		    		rowValueArr.push(idArr);
-		    		rowValueArr.push(titleArr);
-		    		for (let x = 0; x < columnPropArr.length; x++){
-		    			result[columnPropArr[x]] = rowValueArr[x];
-		    		}
-
-		    		return {
-		    			tableName: tableName,  
-		    			table: result
-		    		}
-	    		}
 	    		let targetRow = e.target.parentNode;
 	    		let parentTable = targetRow.parentNode;
 	    		let destinationTable = getUpdatedData(parentTable);
@@ -295,20 +258,81 @@ const app = function() {
 	    			sender: originTable,
 	    			reciever: destinationTable
 	    		}
-	    		console.log(updatedTables);
 	    		return updatedTables;
 	        }
+			function getUpdatedData(table){
+				let prop = table.querySelectorAll('.Table-header > .Table-row-item');
+				let value = table.querySelectorAll('.row-data > .Table-row-item');
+				let tableName = table.parentNode.previousSibling.innerText;
 
+				let columnPropArr = [];
+				// idArr and titleArr go into rowValueArr
+				let rowValueArr = [];
+				let idArr = [];
+				let titleArr = [];
+				// final table
+				let result = {};
+				// get column ids
+				for (let x = 0; x < prop.length; x++){
+					let property = prop[x].innerText.toLowerCase();
+					// eliminate extra line at end of string
+					property = property.replace(/(\r\n|\n|\r)/gm,"");
+					columnPropArr.push(property);
+				}
+				// get and sort value data
+				for (let x = 0; x < value.length; x ++) {
+					if(x % 2 === 0){
+					    idArr.push(value[x].innerText);
+					} else {
+						titleArr.push(value[x].innerText);
+					}
+				}
+				rowValueArr.push(idArr);
+				rowValueArr.push(titleArr);
+				// create table object
+				for (let x = 0; x < columnPropArr.length; x++){
+					result[columnPropArr[x]] = rowValueArr[x];
+				}
+
+				return {
+					tableName: tableName,  
+					table: result
+				}
+			}
 	        function sendData(data){
 	        	console.log('sendData data');
-	        	console.log(data);
-				// $.ajax({
-				//   type: "POST",
-				//   url: url,
-				//   data: data,
-				//   success: success,
-				//   dataType: dataType
-				// });
+	        	console.log('sender', data.sender);
+	        	console.log('reciever', data.reciever);
+	        	putData(data.reciever);
+	        	putData(data.sender);
+
+	        	function putData(data){
+	        		const dataLength = data.table.length;
+	        		const dataToSend = data.table;
+	        		const dataJSON = JSON.stringify(dataToSend);
+	        		const dataId = data.table.id[0];
+	        		if(dataLength !== 0){
+	        			$.ajax({
+						    url: rootUrl + `/posts/${dataId}`,
+						    type:'PUT',
+						    data: {
+						    	userId: JSON.stringify(data.table.id),
+						    	id: JSON.stringify(data.table.id)
+						    },
+						    dataType: 'json',
+						    success: function() {
+						    	// I could add a svg that spins or a check mark
+						    	// that appears
+						       console.log(`data sent! - ${dataJSON}`);
+						   }
+						}).then(function(data){
+							console.log(`This is the data sent:`);
+							console.log(data);
+						});
+	        		} else {
+	        			console.log('data is 0', dataLength);
+	        		}
+	        	}
 	        }
         }
 
