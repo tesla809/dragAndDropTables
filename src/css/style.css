@@ -1,22 +1,170 @@
+/* Variables
+================================== */
+/* Tables
+================================== */
+@import url(https://fonts.googleapis.com/css?family=Josefin+Sans:400,700);
+.Table {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  border: 1px solid #f2f2f2;
+  font-size: 1rem;
+  margin: 0.5rem;
+  line-height: 1.5;
+}
+.Table-header {
+  display: none;
+  background-color: rgba(242, 242, 242, 0.8);
+}
+@media (min-width: 500px) {
+  .Table-header {
+    font-weight: 700;
+    background-color: #f2f2f2;
+  }
+}
+.Table-row {
+  width: 100%;
+}
+.Table-row:nth-of-type(even) {
+  background-color: #f2f2f2;
+}
+.Table-row:nth-of-type(odd) {
+  background-color: #ffffff;
+}
+@media (min-width: 500px) {
+  .Table-row {
+    display: flex;
+    flex-flow: row nowrap;
+  }
+  .Table-row:nth-of-type(even) {
+    background-color: #ffffff;
+  }
+  .Table-row:nth-of-type(odd) {
+    background-color: #f2f2f2;
+  }
+}
+.Table-row-item {
+  display: flex;
+  flex-flow: row nowrap;
+  flex-grow: 1;
+  padding: 0.5em;
+  word-break: break-word;
+}
+.Table-row-item:before {
+  content: attr(data-header);
+  width: 30%;
+  font-weight: 700;
+}
+@media (min-width: 500px) {
+  .Table-row-item {
+    border: 1px solid #ffffff;
+    padding: 0.5em;
+  }
+  .Table-row-item:before {
+    content: none;
+  }
+}
+.Rtable-cell {
+  box-sizing: border-box;
+  flex-grow: 1;
+  width: 100%;
+  padding: 0.8em 1.2em;
+  overflow: hidden;
+  list-style: none;
+  border: solid 3px white;
+}
+.Rtable-cell > h1,
+.Rtable-cell > h2,
+.Rtable-cell > h3,
+.Rtable-cell > h4,
+.Rtable-cell > h5,
+.Rtable-cell > h6 {
+  margin: 0;
+}
+/* Table column sizing
+================================== */
+.Rtable--2cols > .Rtable-cell {
+  width: 50%;
+}
+.Rtable--3cols > .Rtable-cell {
+  width: 33.33%;
+}
+.Rtable--4cols > .Rtable-cell {
+  width: 25%;
+}
+.Rtable--5cols > .Rtable-cell {
+  width: 20%;
+}
+.Rtable--6cols > .Rtable-cell {
+  width: 16.6%;
+}
+/* Page styling
+================================== */
+html {
+  height: 100%;
+  background-color: #EEE;
+}
+body {
+  box-sizing: border-box;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 2em;
+  max-width: 1200px;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 1.2em;
+  background-color: white;
+  border: double 3px #DDD;
+  border-top: none;
+  border-bottom: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+}
+h3 {
+  font-size: 1.2em;
+}
+h4 {
+  font-size: 1em;
+}
+strong {
+  color: #434d57;
+}
+/* Additional styles
+================================== */
+.mainTableFlex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+.tableFlex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+.user-title {
+  margin: auto;
+  width: 50%;
+  text-align: center;
+  vertical-align: middle;
+}
 .center {
   margin: auto;
   width: 50%;
-  border: 3px solid green;
 }
 .centerText {
   text-align: center;
   vertical-align: middle;
 }
-.row {
-  background-color: #333;
-  height: 10%;
-  width: 100%;
-  border: 3px solid green;
-  margin: 10px 0px;
-  overflow: hidden;
+.heading {
+  padding-bottom: 2em;
 }
-.content {
-  width: 100%;
-  background-color: #222;
-  color: #fff;
+/* Drag and drop
+================================== */
+.Rtable.over {
+  border: 2px dashed #000;
 }
