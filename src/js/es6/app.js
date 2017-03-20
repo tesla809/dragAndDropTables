@@ -157,6 +157,8 @@ const app = function() {
                 // get origin table
                 dragStartOrigin = getTableElements(e).table;
                 originalElData = getUpdatedData(dragStartOrigin);
+                console.log('say this and ');
+                console.log(originalElData);
             }
 
             function handleDragOver(e) {
@@ -256,6 +258,7 @@ const app = function() {
 
 	    		let updatedTables = {
 	    			sender: originTable,
+	    			senderOriginal: originalElData,
 	    			reciever: destinationTable
 	    		}
 	    		return updatedTables;
