@@ -16,6 +16,7 @@
 }
 .Table-header {
   display: none;
+  background-color: rgba(242,242,242, 0.8);
 }
 @media (min-width: 500px) {
   .Table-header {
@@ -48,7 +49,6 @@
   display: flex;
   flex-flow: row nowrap;
   flex-grow: 1;
-  flex-basis: 0;
   padding: 0.5em;
   word-break: break-word;
 }
@@ -74,7 +74,7 @@
   overflow: hidden; // Or flex might break
   list-style: none;
   border: solid @bw white;
-  background: fade(slategrey,20%);
+  // background: rgba(112,128,144,0.2);
   > h1, > h2, > h3, > h4, > h5, > h6 { margin: 0; }
 }
 
@@ -149,9 +149,5 @@ strong { color: darken(slategrey,20%); }
 .Rtable.over {
   border: 2px dashed #000;
 }
-
-
-
-
 
 
